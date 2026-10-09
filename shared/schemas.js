@@ -1,0 +1,16 @@
+export const JOB_SCHEMA = {
+	captured_at: '',
+	source: '',
+	title: '',
+	company: '',
+	location: '',
+	salary: '',
+	experience: '',
+	job_type: '',
+	jd_full: '',
+	jd_description: '',
+	jd_required_skills: '',
+	jd_preferred_qualifications: '',
+	job_url: '',
+	notes: '',
+};

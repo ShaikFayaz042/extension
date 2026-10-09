@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JobStack</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ Header ============ -->
+  <header class="topbar">
+    <div class="brand">
+      <img src="icons/jobstacker-logo.png" alt="" class="brand-logo" id="brandLogo">
+      <div class="brand-text"><strong>JobStack</strong><span>Find · Apply · Track</span></div>
+    </div>
+    <div class="topbar-right">
+      <span id="site-badge" class="chip" title="Current page">Detecting…</span>
+      <button id="authBadge" class="chip chip-status" type="button" title="Account connection"><i class="dot"></i><span>Connected</span></button>
+    </div>
+  </header>
+
+  <!-- ============ Views ============ -->
+  <main class="views">
+
+    <!-- DISCOVER -->
+    <section id="view-discover" class="view active" data-view="discover">
+      <div id="discovery-panel-root" class="discovery-app">
+        <div class="seg" role="tablist">
+          <button class="tab active" data-tab="scan" role="tab">Scan</button>
+          <button class="tab" data-tab="filters" role="tab">Filters</button>
+        </div>
+
+        <div id="tab-scan" class="tab-content active">
+          <div class="toolbar">
+            <button id="scan-btn" class="btn primary" disabled>Scan page</button>
+            <button id="save-btn" class="btn" disabled>Save</button>
+            <button id="auto-scan-btn" class="btn" disabled title="Auto scan all pages">Auto</button>
+            <button id="send-server-btn" class="btn" disabled title="Send buffer to backend">Send</button>
+            <button id="extract-jd-btn" class="btn" disabled title="Extract JD for server jobs ready for extraction">Extract JD</button>
+            <button id="cancel-btn" class="btn danger" hidden>Cancel</button>
+            <button id="refresh-btn" class="btn icon-btn" title="Re-detect page" aria-label="Re-detect page">↻</button>
+          </div>
+          <div id="jd-progress" class="jd-progress" hidden>
+            <div class="jd-progress-bar"><div class="jd-progress-fill" style="width:0%"></div></div>
+            <div class="jd-progress-text">0 / 0</div>
+          </div>
+          <div id="status" class="status">Ready</div>
+          <div class="section-header"><span>Preview</span><span id="job-count" class="counter">0 jobs</span></div>
+          <div id="jobs-list" class="jobs-list"><div class="empty-state">No jobs scanned yet</div></div>
+          <footer class="panel-foot">
+            <span class="buffer-info">Buffer: <strong id="buffer-count">0</strong> jobs</span>
+            <span class="foot-actions">
+              <button id="download-btn" class="btn small" disabled>Download CSV</button>
+              <button id="clear-btn" class="btn small danger" disabled>Clear</button>
+            </span>
+          </footer>
+        </div>
+
+        <div id="tab-filters" class="tab-content">
+          <div class="filter-toolbar">
+            <select id="preset-select" class="preset-select" aria-label="Preset"></select>
+            <input id="preset-name-input" class="preset-name-input" type="text" placeholder="New preset" aria-label="Preset name">
+            <button id="preset-new-btn" class="btn small" title="Create preset">Create</button>
+            <button id="preset-save-btn" class="btn small" title="Save changes">Save</button>
+            <button id="preset-delete-btn" class="btn small danger" title="Delete preset">Delete</button>
+          </div>
+          <div id="filter-status" class="status">Loading filters…</div>
+          <div id="filter-groups" class="filter-groups"></div>
+          <footer class="panel-foot">
+            <span class="foot-actions wide">
+              <button id="reset-filters-btn" class="btn small danger" title="Clear filters in the active preset">Reset</button>
+              <button id="capture-filters-btn" class="btn small">Capture URL</button>
+              <button id="apply-filters-btn" class="btn small">Apply</button>
+              <button id="apply-scan-btn" class="btn small primary">Apply &amp; scan</button>
+            </span>
+          </footer>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPLY -->
+    <section id="view-apply" class="view" data-view="apply">
+      <div id="tab-apply" class="scroll">
+        <div class="card">
+          <div class="row between">
+            <span class="muted">Queue · <strong id="apply-queue-count">0</strong> jobs</span>
+            <span class="row gap">
+              <button id="apply-reload-btn" class="btn small" title="Reload queue from server" aria-label="Reload queue">↻</button>
+              <button id="apply-clear-btn" class="btn small danger" title="Clear local apply queue" aria-label="Clear queue">Clear</button>
+            </span>
+          </div>
+          <div id="apply-status" class="status flat">No queue loaded</div>
+          <div class="apply-nav">
+            <button id="apply-prev-btn" class="apply-nav-btn" title="Previous job" aria-label="Previous job" disabled>‹</button>
+            <span class="apply-counter"><strong id="apply-index-display">0</strong> / <span id="apply-total-display">0</span></span>
+            <button id="apply-next-btn" class="apply-nav-btn" title="Next job" aria-label="Next job" disabled>›</button>
+          </div>
+          <div id="apply-current-card" class="apply-current-card hidden">
+            <div class="apply-current-title" id="apply-current-title">—</div>
+            <div class="apply-current-company" id="apply-current-company">—</div>
+            <div class="apply-current-meta"><span id="apply-current-exp"></span><span id="apply-current-sal"></span><span id="apply-current-loc"></span></div>
+            <div class="apply-current-actions">
+              <button id="apply-open-btn" class="btn small apply-open-btn" type="button">Open job</button>
+              <button id="apply-click-btn" class="btn small" type="button" disabled>Click Apply</button>
+            </div>
+          </div>
+          <div id="apply-empty" class="empty-state">No job queue loaded</div>
+          <button id="apply-autofill-btn" class="btn primary block" type="button">Autofill current application</button>
+          <div id="apply-autofill-status" class="muted tiny" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Page tools</div>
+          <button id="autofillBtn" class="btn block" type="button">Autofill this page</button>
+          <div id="autofillStatus" class="muted tiny" role="status" aria-live="polite"></div>
+          <div class="row gap mt">
+            <button id="previewBtn" class="btn small" type="button">Preview fields</button>
+            <button id="forceLogBtn" class="btn small" type="button" style="display:none">Register site</button>
+          </div>
+          <div id="previewContainer" hidden>
+            <textarea id="previewText" rows="7" readonly></textarea>
+            <div class="row gap"><button id="copyPreviewBtn" class="btn small primary" type="button">Copy all</button><button id="closePreviewBtn" class="btn small" type="button">Close</button></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- APPLICATIONS (tracker / sync) -->
+    <section id="view-applications" class="view" data-view="applications">
+      <div class="scroll">
+        <div class="card">
+          <div class="row between">
+            <span class="muted">Platform detected</span>
+            <span id="detectedPlatform" class="chip">Unknown</span>
+          </div>
+          <button id="extractBtn" class="btn primary block mt" type="button">Sync applications from this page</button>
+          <div id="syncStatus" class="muted tiny">Open LinkedIn, Naukri, Wellfound or Internshala applied-jobs page.</div>
+        </div>
+
+        <div class="card">
+          <div class="row between"><span class="card-title">Your applications</span><span id="stackTotalLabel" class="strong">0 jobs</span></div>
+          <div class="stack-bar" id="stackBar" role="img" aria-label="Applications by platform">
+            <i class="seg-linkedin" data-platform="linkedin"></i><i class="seg-naukri" data-platform="naukri"></i><i class="seg-wellfound" data-platform="wellfound"></i><i class="seg-internshala" data-platform="internshala"></i>
+          </div>
+          <div class="legend">
+            <a class="legend-row" target="_blank" href="https://www.linkedin.com/jobs-tracker/"><i class="pd linkedin"></i>LinkedIn<b id="linkedinCount">0</b></a>
+            <a class="legend-row" target="_blank" href="https://www.naukri.com/myapply/historypage"><i class="pd naukri"></i>Naukri<b id="naukriCount">0</b></a>
+            <a class="legend-row" target="_blank" href="https://wellfound.com/jobs/applications"><i class="pd wellfound"></i>Wellfound<b id="wellfoundCount">0</b></a>
+            <a class="legend-row" target="_blank" href="https://internshala.com/student/applications"><i class="pd internshala"></i>Internshala<b id="internshalaCount">0</b></a>
+          </div>
+          <div class="row between mt muted tiny"><span>Detected <strong id="jobsDetected">0</strong></span><span>Last sync <strong id="lastSync">—</strong></span></div>
+        </div>
+
+        <button id="openAppBtn" class="btn block" type="button">Open JobStack dashboard ↗</button>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="view-settings" class="view" data-view="settings">
+      <div class="scroll">
+        <div class="card">
+          <div class="card-title">Account</div>
+          <div class="row between"><span class="muted">Connection</span><span id="settingsAuth" class="strong">—</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Appearance</div>
+          <div class="seg"><button class="theme-btn" data-theme="auto">Auto</button><button class="theme-btn" data-theme="light">Light</button><button class="theme-btn" data-theme="dark">Dark</button></div>
+        </div>
+        <div id="advancedToggleWrapper" class="card advanced-toggle-wrapper">
+          <div class="card-title">Developer</div>
+          <button id="devModeToggleBtn" class="btn block" type="button" aria-pressed="false">Development mode: OFF</button>
+          <label class="field">Backend API URL<input type="text" id="backendUrl" value="https://jobstack-api.onrender.com/api/extract/store"></label>
+          <label class="field">Frontend URL<input type="text" id="frontendUrl" value="https://jobstack-live.vercel.app/"></label>
+          <button id="testConnectionBtn" class="btn small mt" type="button">Test connection</button>
+          <div id="connectionStatus" class="muted tiny" aria-live="polite">Not tested yet</div>
+        </div>
+        <div class="muted tiny center">Your data is secure and private · <span id="versionClick">v2.0.0</span></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ Bottom nav ============ -->
+  <nav class="nav" id="mainNav" aria-label="JobStack">
+    <button class="nav-item active" data-view="discover"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>Discover</button>
+    <button class="nav-item" data-view="apply"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/></svg>Apply</button>
+    <button class="nav-item" data-view="applications"><svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/></svg>Applications</button>
+    <button class="nav-item" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>Settings</button>
+  </nav>
+</div>
+
+<script src="../auth/session.js"></script>
+<script src="../api/client.js"></script>
+<script src="../api/profiles.js"></script>
+<script src="../api/discovery.js"></script>
+<script src="../api/applications.js"></script>
+<script src="../api/tracking.js"></script>
+<script src="../application/queue.js"></script>
+<script src="../application/apply-coordinator.js"></script>
+<script src="panel.js"></script>
+
